@@ -13,10 +13,9 @@
 \newcommand{\vect}[1]{\boldsymbol{#1}}
 \title{basic functions analytic hamiltonians}
 \begin{document}
-The construction of compact and, often, exact representations of the Born-Oppenheimer nuclear kinetic energy operator is well established. Prior to the widespread application of variational methods in diagonalisation, Watson derived the exact kinetic energy operator in normal coordinates, further generalised to other rectilinear coordinates, such as Jacobi and Radau. To enable practical calculations of high energy states, `floppy' molecules, and complexes, exploration of curvilinear coordinate types also proved necessary. Handy provided an exact kinetic energy operator for valence coordinates, developed further by X.  Using the valence, as well as Jacobi, coordinates can be considered a subset of the more general polyspherical coordinates, pursued by X. 
+The construction of compact and, often, exact representations of the Born-Oppenheimer nuclear kinetic energy operator is well established. Prior to the widespread application of variational methods in diagonalisation, Watson derived the exact kinetic energy operator in normal coordinates, further generalised to other rectilinear coordinates, such as Jacobi and Radau. To enable practical calculations of high energy states, molecules with large amplitude motion, and complexes, exploration of curvilinear coordinate types also proved necessary. Handy provided an exact kinetic energy operator for valence coordinates, developed by X. The valence, as well as Jacobi, coordinates can be considered a subset of the more general polyspherical coordinates, pursued by X. 
 
-Numerical methods have also proved fruitful, such as the discrete value representation of the kinetic energy operator. Another approach, that of Taylor expansion, is what the TROVE (Theoretical Ro-Vibrational Energies) program has employed up to this point. Here, we describe an update to TROVE which generalises this approach to arbitrary functions of the coordinates, as opposed to simply powers in the Taylor expansion. 
-
+Numerical methods have also proved fruitful, such as the discrete value representation of the kinetic energy operator. Another approach, that of Taylor expansion, is what the TROVE (Theoretical Ro-Vibrational Energies) program has employed up to this point. Here, we describe an update to TROVE which generalises this method to arbitrary functions of the coordinates, as opposed to being simply powers in the Taylor expansion. 
 To demonstrate, let us consider a molecule with $N$ atoms, and parametrise the nuclear coordinates with three centre of mass coordinates $\{X,Y,Z\}$ in the laboratory-frame, three Eulerian angles $\{\theta, \phi, \psi\}$ which specify the orientation of the body-fixed frame with respect to the space-fixed frame, and $3N-6$ internal coordinates $\{q_1, \ldots, q_{3N-6}\}$. With this parametrisation, the nuclear kinetic energy operator is  
 \[
 \hat{T}= \dfrac12 \sum_{a,b}\hat{\pi}_a G_{ab}\hat{\pi}_b + U
@@ -29,36 +28,36 @@ where the $f$s are functions and $a_p$ is the coefficient with $p\in \{i_1, \ldo
  
 This form generalises the current TROVE approach in which 
 \[
-\sum_{p} a_p (f_1(q_1))^{i_1} (f_2(q_2))^{i_2} \ldots (f_{3N-6})(q_{3N-6})^{i_{3N-6}}
+\sum_{p} a_p (f_1(q_1))^{i_1} (f_2(q_2))^{i_2} \ldots (f_{3N-6}(q_{3N-6}))^{i_{3N-6}}
 \]
 where the sum is over all $p$ and $p \in \{ i_1, \dots, i_{3N-6} | i_1 + \ldots + i_{3N-6} \leq n\}$ for some integer, i.e. Taylor expanding the $G$ components and $U$ in functions each of the coordinates with a maximum overall power governed by $n$. Typically, the $q$s are linearised coordinates constructed from geometrically defined coordinates. Using the notation of the more general expression, one can see that $f_{ij}(q_i) = (f_{i}(q_i))^j$. 
 
-In the new TROVE implementation, no restrictions are made on the form of the $f$s and the same machinery is applicable in diagonolising the Hamiltonian (described in the following) when using the Taylor expansion or the arbitrary functions. For the practical implementation, however, we have considered valence coordinates in particular, and we are able, with relative simplicity, to generate exact and seperable kinetic energy operators. 
+In the new TROVE implementation, no restrictions are made on the form of the $f$s and the same machinery is applicable in diagonolising the Hamiltonian (described in the following) when using the Taylor expansion or the arbitrary functions. For the practical implementation, however, we have considered valence coordinates in particular, and we are able with relative simplicity to generate exact and seperable kinetic energy operators. 
 
-This are two advantages to the newer approach. Evidently, the analytic kinetic energy operator is exact and therefore should be expected to give more accurate results. Convergence is not necessarily achieved when Taylor expanding the kinetic energy operator, even for `high' values of $n$, such as 6. Moreover, such large values of $n$ are only possible with small molecules due to the rate at which the number of terms increases with $n$. 
+This are two advantages with this particular implementation. Evidently, the analytic kinetic energy operator is exact and therefore should be expected to give more accurate results. Convergence is not necessarily achieved when Taylor expanding the kinetic energy operator, even for `high' values of $n$, such as 6. Moreover, such large values of $n$ are only possible with small molecules due to the rate at which the number of terms increases with $n$. 
 
 Related to this, the other benefit of the newer approach is the smaller number of terms in the Hamiltonian reduces the number of calculations that need to be performed during evaluation of matrix elements and recudes the disc space needed to store the Hamiltonian. This is particularly true if one of the coordinates, $\rho$, say, is treated as a non-rigid degree of freedom, so that $a_p(\rho)$ becomes a function of $\rho$ to be evaluated at a grid of points. A typical value of 1000 points inreases the number of terms in the Hamiltonian by the same factor. An analytic Hamiltonian does away with needing to express $a_p$ as a function of another coordinate, even a non-rigid one. 
 
 To diagonalise the Hamiltonian, we must evaluate matrix elements $\matrixel{\psi_i}{G}{\psi_j}$ and $\matrixel{\psi_i}{U}{\psi_j}$, where $\ket{\psi_i}$ is the $i$th basis function. These have the general form
 \[
-\prod_a \ket{\nu_a} \ket{J, K, m, \pm}
+ \prod_a \ket{\nu_a} \times \ket{J, K, m, \pm}
 \]
-where $\ke{J, K, m, \pm}$ is the rotational basis function, defined in X, and $\ket{\nu}_a is the $\nu$th excitation of the $a$ coordinate, obtained by solving the 1D Schrodinger equation
+where $\ket{J, K, m, \pm}$ is the rotational basis function, defined in X, and $\ket{\nu}_a$ is the $\nu$th excitation of the $a$th coordinate, obtained by solving the 1D Schrodinger equation
 \[
-\pi_a G^{\text 1D}_{aa} \pi_a + U^{\text 1D} + V^{\text 1D}
+\dfrac12 \hat{\pi}_a G^{\text 1D}_{aa}(q_a) \hat{\pi}_a + U^{\text 1D}(q_a) + V^{\text 1D}(q_a)
 \]
-where $V$ is the potential. The 1D versions of the kinetic energy operator components are constructed by constraining the other $3N-7$ coordinates to their equilibrium values. The former method stores certain elemantary integrals, namely \[ \begin{split}
-		&\matrixel{\nu_i}{(q_i)^j}{\nu_i'} \\
-		&\matrixel{\nu_i}{(q_i)^j\hat{\pi}_i}{\nu_i'} \\
-		&\matrixel{\nu_i}{\hat{\pi}_i (q_i)^j}{\nu_i'} = - \matrixel{\nu_i}{(q_i)^j \hat{\pi}_i}{\nu_i'}\\
-		&\matrixel{\nu_i}{\hat{\pi}_i (q_i)^j\hat{\pi}_i}{\nu_i'} \\
-	\end{split}.
+where $V$ is the potential energy surface. The 1D versions of the kinetic energy operator components are constructed by constraining the other $3N-7$ coordinates to their equilibrium values. The former method stores certain elemantary integrals, namely \[ \begin{split}
+	&\matrixel{\nu_i}{(q_i)^j}{\nu_i'} \\
+	&\matrixel{\nu_i}{(q_i)^j\hat{\pi}_i}{\nu_i'} \\
+	&\matrixel{\nu_i}{\hat{\pi}_i (q_i)^j}{\nu_i'} = - \matrixel{\nu_i}{(q_i)^j \hat{\pi}_i}{\nu_i'}\\
+	&\matrixel{\nu_i}{\hat{\pi}_i (q_i)^j\hat{\pi}_i}{\nu_i'} \\
+\end{split}.
 \]
 This allows the matrix elements to be calculated through only algebraic manipulations of the elementary integrals. Thus, we see that it is crucial for the terms in the newer method to be separable so that all integrals reduce to a sum of products of 1D integrals. With the newer approach, however, the lower number of terms also greatly reduces the number of algebraic manipulations required. 
 
-In this paper, we shall describe a straightforward way to derive an exact and separable kinetic energy operator in valence coordinates for an arbitrary function. Morever, we will show that there is a finite list of possible functions $f$ that is present in $G$ and $U$ and that this list is independent of the molecule, although it does depend on the body-fixed frame in a systematic way.   
+In this paper, we shall describe a straightforward way to derive an exact and separable kinetic energy operator in valence coordinates for an arbitrary molecule. Morever, we will show that there is a finite list of possible functions $f$ that is present in $G$ and $U$ and that this list is independent of the molecule, although it does depend on the body-fixed frame in a systematic way. Although there is nothing essentially new in this result, the simplicity of the method, and the intermediate result in the transformation of the $s$-vectors (defined later) valid for any internal coordinates,  make it of interest.    
 
-To do so, we shall largely follow Sorensen's method for obtaining the Hamiltonian, which we will briefly outline. The $G$ matrix and pseudo potential $U$ are given by
+To do so, we shall largely follow Sorensen's method for obtaining the kinetic energy operator, which we will briefly outline. The $G$ matrix and pseudo potential $U$ are given by
 \[
 \begin{split}
 G_{ab} &= \sum_{\alpha} \frac{1}{m_\alpha}\vect{s}_{a, \alpha}\cdot \vect{s}_{b, \alpha} \\
@@ -75,7 +74,7 @@ The $t$ matrix itself is constructed from three types of vectors,
     \vect{t}_{k,\alpha} &= \pdv{\vect{r}_\alpha}{q_k} \text{(vibrations)} 
 \end{split}
 \]
-where $\vect{e}_F$ is the unit vector in the $F$ direction and $\vect{r}_\alpha$ is the Cartesian coordinate of atom $\alpha$ in the centre of mass frame. One can immediately calculate the corresponding translational and vibrational $s$-vectors,
+where $\vect{e}_F$ is the unit vector in the $F$ direction and $\vect{r}_\alpha$ is the Cartesian coordinate of atom $\alpha$ in the centre of mass frame. One can also calculate the corresponding translational and vibrational $s$-vectors without the $t$-vectors,
 \[
 \begin{split}
     \vect{s}_{F,\alpha} &= \frac{m_\alpha}{M}\vect{e}_F \text{(translations)} \\
@@ -83,11 +82,11 @@ where $\vect{e}_F$ is the unit vector in the $F$ direction and $\vect{r}_\alpha$
 \end{split}
 \]
 
-To obtain the rotational $s$-vectors requires further work. One first defines three constraints defined from the orientation of the axes: 
+To obtain the rotational $s$-vectors requires further work. One first creates three constraints defined by the orientation of the axes: 
 \[
 C^{(g)}(r_{1x}, r_{1y}, \ldots, r_{Nz}) = 0
 \]
-where $g \in \{x,y,z\}$, although the ordering of the conditions is irrelevant. One then creates a new set of vectors given by 
+where $g \in \{x,y,z\}$, although the ordering of the conditions is irrelevant. We shall show simple examples later. One then creates a new set of vectors given by 
 \[
 \vect{c}_{g, \alpha} = \sum_{g'}\vect{e}_{g'}\pdv{C^{(g)}}{r_{\alpha g'}}
 \]
@@ -103,7 +102,16 @@ One further point that to note is that the $\vect{c}$ vectors must satisfy the r
 \[
 \sum_{\alpha} \vect{c}_{g, \alpha} = 0.
 \]
-If they do not, they can be readily adjusted to $\vect{c}'$ via
+This arises because of the conditions rotational $s$-vectors that the translational $t$-vectors impose:
+\[
+\sum_\alpha \vect{t}_{F, \alpha}\cdot \vect{s}_{g, \alpha}  
+= \sum_\alpha \vect{e}_F \cdot \vect{s}_{g, \alpha}= 0.
+\]
+An analogous condition exists for the vibrational $s$-vectors. This implies 
+\[
+\sum_\alpha \vect{s}_{g, \alpha} = 0
+\]
+which, because $J$ is invertible, imposes it on the $\vect{c}_{g, \alpha}$ vectors also. If they do not satisfy this condition, they can be readily adjusted to $\vect{c}'$ via
 \[
 \vect{c}'_{g, \alpha} = \vect{c}_{g, \alpha} -\frac{m_\alpha}{M} \sum_{\alpha'} \vect{c}_{g, \alpha'} 
 \]
@@ -120,7 +128,7 @@ Next, we consider the vibrational $s$-vectors $\vect{s}_{k, \alpha}$. All intern
 \[
 q_k(M\vect{r}_1 + \vect{d}, M\vect{r}_2 + \vect{d}, \ldots, M\vect{r}_N + \vect{d}) = q_k(\vect{r}_1, \vect{r}_2, \ldots, \vect{r}_N)
 \]
-where $\vect{d}$ is a displacement vector. Calling $T(\vect{r}) = M\vect{r} + \vect{d}$, and $\partial_{\alpha i}$ being the derivative of the argument of $q_k$ corresponding to component $i$ of atom $\alpha$, we want to determine $\partial_{\alpha i}(q_k)(T(\vect{r}_1), \ldots, T(\vect{r}_N))$ in terms of $\partial_{\alpha i}(q_k)(\vect{r}_1, \ldots, \vect{r}_N)$, that is, the $\alpha i$ derivative evaluated at the transformed coordinates in terms of the derivative evaluated at the un-transformed coordinates. Let us define the function $\tilde{T}$ as
+where $\vect{d}$ is a displacement vector. Calling $T\vect{r} = M\vect{r} + \vect{d}$, and $\partial_{\alpha i}$ being the derivative of the argument of $q_k$ corresponding to component $i$ of atom $\alpha$, we want to determine $\partial_{\alpha i}(q_k)(T(\vect{r}_1), \ldots, T(\vect{r}_N))$ in terms of $\partial_{\alpha i}(q_k)(\vect{r}_1, \ldots, \vect{r}_N)$, that is, the $\alpha i$ derivative evaluated at the transformed coordinates in terms of the derivative evaluated at the un-transformed coordinates. Let us define the function $\tilde{T}$ as
 \[
 \Tilde{T}(\vect{r}_1, \ldots \vect{r}_N) = (T\vect{r}_1, \ldots, T\vect{r}_N).
 \]
@@ -130,15 +138,15 @@ q_k \circ \tilde{T}(\vect{r}_1, \ldots, \vect{r}_N) = q_k(\vect{r}_1, \ldots, \v
 \]
 Differentiating both sides, and using the chain rule, we obtain
 \[
-\partial_{\alpha i}(q_k)(\vect{r}_1, \ldots, \vect{r}_N) =\partial_{\alpha i} (q_k \circ \tilde{T})(\vect{r}_1, \ldots, \vect{r}_N)) 
+\partial_{\alpha i}(q_k)(\vect{r}_1, \ldots, \vect{r}_N) =\partial_{\alpha i} (q_k \circ \tilde{T})(\vect{r}_1, \ldots, \vect{r}_N) 
 \]
 \[
-= \sum_{\beta} \partial_{\alpha i}(T)^{\beta j}(\vect{r}_1, \ldots, \vect{r}_N)\cdot 
-\partial_{\beta j}(q_k)(T(\vect{r}_1, \ldots, \vect{r}_N)
+= \sum_{\beta} \partial_{\alpha i}(\tilde{T})^{\beta j}(\vect{r}_1, \ldots, \vect{r}_N)\cdot 
+\partial_{\beta j}(q_k)(\tilde{T}(\vect{r}_1, \ldots, \vect{r}_N))
 \]
 where $\beta \in \{1, \ldots, N\}$ is over the atoms and $j \in \{x, y, z\}$ is over the coordinates, the latter using Einstein's summation convention. Here $\partial_{\alpha i}(\tilde{T})^{\beta j}$ is the $\beta j$ component of the derivative of $\tilde{T}$, which is nonzero only when $\beta =\alpha$ and is given by $M_{ji}$. We thus have 
 \[
-\partial_{\alpha i}(q_k)(\vect{r}_1, \ldots, \vect{r}_N) =  M_{ji}\partial_{\alpha j}(q_k)(\tilde{T}(\vect{r}_1, \ldots, \vect{r}_N)
+\partial_{\alpha i}(q_k)(\vect{r}_1, \ldots, \vect{r}_N) =  M_{ji}\partial_{\alpha j}(q_k)(\tilde{T}(\vect{r}_1, \ldots, \vect{r}_N))
 \]
 which can be inverted to give
 \[
@@ -156,7 +164,7 @@ We must also check the rotational $t$ and $s$ vectors behave properly as inverse
 \delta_{kk'} &= \sum_{\alpha} \vect{s}'_{k, \alpha}\cdot \vect{t}'_{k', \alpha} = \sum_{\alpha}  M\vect{s}_{k, \alpha}\cdot M\vect{t}_{k', \alpha} +  M\vect{s}_{k, \alpha}\cdot \pdv{M}{q_{k'}}\vect{r}_\alpha \\ &= \delta_{kk'} + \sum_{\alpha}  M\vect{s}_{k, \alpha}\cdot \pdv{M}{q_{k'}}\vect{r}_\alpha \\
 \end{split}
 \]
-implying
+which implies that
 \[
 \sum_{\alpha}  M\vect{s}_{k, \alpha}\cdot \pdv{M}{q_k'}\vect{r}_\alpha  =\sum_{\alpha} M_{ij} s_{k, \alpha j}\pdv{M_{im}}{q_{k'}}r_{ \alpha m}= 0.
 \]
